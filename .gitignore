@@ -1,0 +1,4 @@
+server/uploads/*
+server/deploy/*
+!server/uploads/.gitkeep
+!server/deploy/.gitkeep
