@@ -113,7 +113,7 @@ class FullServeHandler(SimpleHTTPRequestHandler):
 
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(f"Uploaded: {filename}\n".encode())
+        self.wfile.write(f"[+] Uploaded: {filename}\n".encode())
 
         self.log_access(200, size=len(data))
 
